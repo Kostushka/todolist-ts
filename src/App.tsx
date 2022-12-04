@@ -1,78 +1,63 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import './App.css';
-import { Todolist } from './Todolist';
+import Todolist from './components/Todolist';
+import { v1 } from 'uuid';
+
+export type FilterValuesType = 'all' | 'active' | 'completed';
 
 function App() {
-    // const task = [
-    //     { id: 1, title: 'HTML&CSS', isDone: true },
-    //     { id: 2, title: 'JS', isDone: true },
-    //     { id: 3, title: 'ReactJS', isDone: false },
-    // ];
-
-    // const [tasks, setTasks] = useState(task);
-
     const [tasks, setTasks] = useState([
-        { id: 1, title: 'HTML&CSS', isDone: true },
-        { id: 2, title: 'JS', isDone: true },
-        { id: 3, title: 'ReactJS', isDone: false },
-        { id: 4, title: 'ReactJS', isDone: false },
-        { id: 5, title: 'ReactJS', isDone: false },
-        { id: 6, title: 'ReactJS', isDone: false },
+        { id: v1(), title: 'HTML&CSS', isDone: true },
+        { id: v1(), title: 'JS', isDone: true },
+        { id: v1(), title: 'ReactJS', isDone: false },
+        { id: v1(), title: 'Rest API', isDone: false },
+        { id: v1(), title: 'GraphQL', isDone: false },
     ]);
 
-    const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
+    const [filter, setFilter] = useState<FilterValuesType>('all');
 
-    const changeFilter = (value: 'all' | 'active' | 'completed') => {
-        setFilter(value);
-    };
-
-    const selectedTasks = () => {
-        // не меняем массив в local state: отрисовываем переменную с копией отфильтрованного массива
-        let filteredTasks = tasks;
-        switch (filter) {
-            case 'all':
-                filteredTasks = tasks;
-                break;
-            case 'active':
-                filteredTasks = tasks.filter((el) => !el.isDone);
-                break;
-            case 'completed':
-                filteredTasks = tasks.filter((el) => el.isDone);
-                break;
-        }
-        return filteredTasks;
-    };
-    const filteredTasks = selectedTasks();
-
-    const removeTask = (id: number) => {
-        // изменяем исходный массив
+    function removeTask(id: string) {
         setTasks(tasks.filter((el) => el.id !== id));
-    };
+    }
 
-    // const selectTasks = (stateTasks: 'all' | 'active' | 'completed') => {
-    //     switch (stateTasks) {
-    //         // отрисовываем нужный массив
-    //         case 'all':
-    //             setTasks(task);
-    //             break;
-    //         case 'active':
-    //             setTasks(task.filter((el) => !el.isDone));
-    //             break;
-    //         case 'completed':
-    //             setTasks(task.filter((el) => el.isDone));
-    //             break;
-    //     }
-    // };
+    function addTask(title: string) {
+        setTasks([{ id: v1(), title, isDone: false }, ...tasks]);
+    }
+
+    function changeIsDone(taskId: string, isDone: boolean) {
+        setTasks(
+            tasks.map((el) => (el.id === taskId ? { ...el, isDone } : el))
+        );
+    }
+
+    function changeFilter(value: FilterValuesType) {
+        setFilter(value);
+    }
+
+    const filteredTasksFunc = () => {
+        let tasksForTodolist = tasks;
+
+        switch (filter) {
+            case 'active':
+                return tasksForTodolist.filter((el) => !el.isDone);
+            case 'completed':
+                return tasksForTodolist.filter((el) => el.isDone);
+
+            case 'all':
+                return tasksForTodolist;
+        }
+    };
 
     return (
         <div className='App'>
             <Todolist
                 title='What to learn'
-                tasks={filteredTasks}
-                // tasks={tasks}
+                tasks={filteredTasksFunc()}
                 removeTask={removeTask}
-                // selectTasks={selectTasks}
                 changeFilter={changeFilter}
+                addTask={addTask}
+                changeIsDone={changeIsDone}
+                filter={filter}
             />
         </div>
     );

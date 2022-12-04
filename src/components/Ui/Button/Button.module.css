@@ -1,0 +1,23 @@
+.button {
+    min-width: 30px;
+    min-height: 30px;
+    background-color: greenyellow;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    margin: 0px 5px;
+}
+.button:hover {
+    cursor: pointer;
+    background-color: rgb(93, 224, 32);
+}
+.button:active {
+    background-color: green;
+}
+
+.current {
+    background-color: aqua;
+}
+
+.default {
+    margin-bottom: 5px;
+}

@@ -1,0 +1,12 @@
+.input {
+    width: 200px;
+    min-height: 20px;
+    padding: 5px 8px;
+    outline: none;
+    border: 3px solid lightblue;
+    border-radius: 3px;
+}
+
+.errorMessage {
+    color: red;
+}
