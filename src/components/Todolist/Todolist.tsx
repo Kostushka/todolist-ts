@@ -1,28 +1,27 @@
 import React, { KeyboardEvent, useState } from 'react';
-import { FilterValuesType } from '../../App';
+import { FilterValuesType } from '../../types/types';
+import { TaskType } from '../../types/types';
 import Button from '../Ui/Button';
 import Checkbox from '../Ui/Checkbox/Checkbox';
 import Input from '../Ui/Input';
 
 import styles from './Todolist.module.css';
 
-type TaskType = {
-    id: string;
-    title: string;
-    isDone: boolean;
-};
-
 type PropsType = {
+    todoId: string;
     title: string;
     tasks: Array<TaskType>;
     filter: FilterValuesType;
-    removeTask: (taskId: string) => void;
-    changeFilter: (value: FilterValuesType) => void;
-    addTask: (title: string) => void;
-    changeIsDone: (taskId: string, isDone: boolean) => void;
+    removeTask: (todoId: string, taskId: string) => void;
+    changeFilter: (todoId: string, value: FilterValuesType) => void;
+    addTask: (todoId: string, title: string) => void;
+    changeIsDone: (todoId: string, taskId: string, isDone: boolean) => void;
+    removeTodoList: (todoId: string) => void;
 };
 
 function Todolist({
+    removeTodoList,
+    todoId,
     addTask,
     changeFilter,
     changeIsDone,
@@ -36,7 +35,7 @@ function Todolist({
 
     const addTaskHandler = () => {
         if (value.trim()) {
-            addTask(value.trim());
+            addTask(todoId, value.trim());
         } else {
             setError(true);
         }
@@ -72,9 +71,17 @@ function Todolist({
         },
     };
 
+    const changeFilterClickHandler = (filter: FilterValuesType) => {
+        return () => changeFilter(todoId, filter);
+    };
+
     return (
         <div>
-            <h3>{title}</h3>
+            <div className={styles.title__container}>
+                <h3>{title}</h3>
+                <Button children={'x'} onClick={() => removeTodoList(todoId)} />
+            </div>
+
             <div>
                 <Input
                     onChange={onChangeHandler}
@@ -84,44 +91,47 @@ function Todolist({
                 />
                 <Button children={'+'} onClick={addTaskHandler} />
             </div>
-            <ul>
-                {tasks.map((t) => {
-                    return (
-                        <li
-                            key={t.id}
-                            className={
-                                t.isDone ? styles.isDone : styles.default
-                            }
-                        >
-                            <Checkbox
-                                checked={t.isDone}
-                                onChange={(checked) =>
-                                    changeIsDone(t.id, checked)
+            {tasks && (
+                <ul>
+                    {tasks.map((t) => {
+                        return (
+                            <li
+                                key={t.id}
+                                className={
+                                    t.isDone ? styles.isDone : styles.default
                                 }
-                            />
-                            <span>{t.title}</span>
-                            <Button
-                                children={'x'}
-                                onClick={() => removeTask(t.id)}
-                            />
-                        </li>
-                    );
-                })}
-            </ul>
+                            >
+                                <Checkbox
+                                    checked={t.isDone}
+                                    onChange={(checked) =>
+                                        changeIsDone(todoId, t.id, checked)
+                                    }
+                                />
+                                <span>{t.title}</span>
+                                <Button
+                                    children={'x'}
+                                    onClick={() => removeTask(todoId, t.id)}
+                                />
+                            </li>
+                        );
+                    })}
+                </ul>
+            )}
+
             <div>
                 <Button
                     className={filterButtonClass.buttonAllClass()}
-                    onClick={() => changeFilter('all')}
+                    onClick={changeFilterClickHandler('all')}
                     children={'All'}
                 />
                 <Button
                     className={filterButtonClass.buttonActiveClass()}
-                    onClick={() => changeFilter('active')}
+                    onClick={changeFilterClickHandler('active')}
                     children={'Active'}
                 />
                 <Button
                     className={filterButtonClass.buttonCompleteClass()}
-                    onClick={() => changeFilter('completed')}
+                    onClick={changeFilterClickHandler('completed')}
                     children={'Completed'}
                 />
             </div>

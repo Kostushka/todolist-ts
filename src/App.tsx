@@ -2,39 +2,99 @@ import React, { useState } from 'react';
 import './App.css';
 import Todolist from './components/Todolist';
 import { v1 } from 'uuid';
-
-export type FilterValuesType = 'all' | 'active' | 'completed';
+import {
+    FilterValuesType,
+    TaskStateType,
+    TaskType,
+    TodolistType,
+} from './types/types';
 
 function App() {
-    const [tasks, setTasks] = useState([
-        { id: v1(), title: 'HTML&CSS', isDone: true },
-        { id: v1(), title: 'JS', isDone: true },
-        { id: v1(), title: 'ReactJS', isDone: false },
-        { id: v1(), title: 'Rest API', isDone: false },
-        { id: v1(), title: 'GraphQL', isDone: false },
+    const id_1 = v1();
+    const id_2 = v1();
+    const id_3 = v1();
+
+    const [todoLists, setTodoLists] = useState<Array<TodolistType>>([
+        { id: id_1, title: 'What to do', filter: 'all' },
+        { id: id_2, title: 'What to buy', filter: 'all' },
+        { id: id_3, title: 'What to learn', filter: 'all' },
     ]);
+    const [tasks, setTasks] = useState<TaskStateType>({
+        [id_1]: [
+            { id: v1(), title: 'HTML&CSS', isDone: true },
+            { id: v1(), title: 'JS', isDone: true },
+            { id: v1(), title: 'ReactJS', isDone: false },
+            { id: v1(), title: 'Rest API', isDone: false },
+            { id: v1(), title: 'GraphQL', isDone: false },
+        ],
+        [id_2]: [
+            { id: v1(), title: 'Milk', isDone: false },
+            { id: v1(), title: 'Bread', isDone: false },
+        ],
+        [id_3]: [
+            { id: v1(), title: 'Math', isDone: false },
+            { id: v1(), title: 'English', isDone: false },
+            { id: v1(), title: 'Phisic', isDone: false },
+        ],
+    });
+    // console.log(tasks);
 
-    const [filter, setFilter] = useState<FilterValuesType>('all');
+    // const [tasks, setTasks] = useState([
+    //     { id: v1(), title: 'HTML&CSS', isDone: true },
+    //     { id: v1(), title: 'JS', isDone: true },
+    //     { id: v1(), title: 'ReactJS', isDone: false },
+    //     { id: v1(), title: 'Rest API', isDone: false },
+    //     { id: v1(), title: 'GraphQL', isDone: false },
+    // ]);
 
-    function removeTask(id: string) {
-        setTasks(tasks.filter((el) => el.id !== id));
+    // const [filter, setFilter] = useState<FilterValuesType>('all');
+
+    function removeTask(todoId: string, id: string) {
+        setTasks({
+            ...tasks,
+            [todoId]: tasks[todoId].filter((el) => el.id !== id),
+        });
     }
 
-    function addTask(title: string) {
-        setTasks([{ id: v1(), title, isDone: false }, ...tasks]);
+    function addTask(todoId: string, title: string) {
+        setTasks({
+            ...tasks,
+            [todoId]: [{ id: v1(), title, isDone: false }, ...tasks[todoId]],
+        });
     }
 
-    function changeIsDone(taskId: string, isDone: boolean) {
-        setTasks(
-            tasks.map((el) => (el.id === taskId ? { ...el, isDone } : el))
+    function changeIsDone(todoId: string, taskId: string, isDone: boolean) {
+        setTasks({
+            ...tasks,
+            [todoId]: tasks[todoId].map((el) =>
+                el.id === taskId ? { ...el, isDone } : el
+            ),
+        });
+    }
+
+    function changeFilter(todoId: string, value: FilterValuesType) {
+        setTodoLists(
+            todoLists.map((el) =>
+                el.id === todoId ? { ...el, filter: value } : el
+            )
         );
     }
 
-    function changeFilter(value: FilterValuesType) {
-        setFilter(value);
-    }
+    const removeTodoList = (todoId: string) => {
+        setTodoLists(todoLists.filter((el) => el.id !== todoId));
 
-    const filteredTasksFunc = () => {
+        // без лишней перерисовки
+        // delete tasks[todoId];
+        // немутирующий способ
+        let copy = { ...tasks };
+        delete copy[todoId];
+        setTasks(copy);
+    };
+
+    const filteredTasksFunc = (
+        tasks: Array<TaskType>,
+        filter: FilterValuesType
+    ) => {
         let tasksForTodolist = tasks;
 
         switch (filter) {
@@ -48,19 +108,24 @@ function App() {
         }
     };
 
-    return (
-        <div className='App'>
+    const todoListCopmonents = todoLists.map((el) => {
+        return (
             <Todolist
-                title='What to learn'
-                tasks={filteredTasksFunc()}
+                key={el.id}
+                todoId={el.id}
+                title={el.title}
+                tasks={filteredTasksFunc(tasks[el.id], el.filter)}
                 removeTask={removeTask}
                 changeFilter={changeFilter}
                 addTask={addTask}
                 changeIsDone={changeIsDone}
-                filter={filter}
+                removeTodoList={removeTodoList}
+                filter={el.filter}
             />
-        </div>
-    );
+        );
+    });
+
+    return <div className='App'>{tasks && <>{todoListCopmonents}</>}</div>;
 }
 
 export default App;

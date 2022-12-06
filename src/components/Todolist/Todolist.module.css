@@ -6,3 +6,8 @@
 .default {
     margin-bottom: 5px;
 }
+
+.title__container {
+    display: flex;
+    align-items: center;
+}
