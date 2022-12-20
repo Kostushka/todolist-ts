@@ -5,10 +5,18 @@ type InputType = {
     value: string;
     onChange: (value: string) => void;
     onKeyPress: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+    onBlur?: () => void;
     errorMessage: boolean;
+    autoFocus?: boolean;
 };
 
-function Input({ onKeyPress, onChange, errorMessage, ...props }: InputType) {
+function Input({
+    onKeyPress,
+    onChange,
+    errorMessage,
+    onBlur,
+    ...props
+}: InputType) {
     return (
         <>
             {errorMessage && <div className={styles.errorMessage}>Error</div>}
@@ -16,6 +24,7 @@ function Input({ onKeyPress, onChange, errorMessage, ...props }: InputType) {
                 className={styles.input}
                 onKeyPress={(e) => onKeyPress(e)}
                 onChange={(e) => onChange(e.currentTarget.value)}
+                onBlur={onBlur}
                 {...props}
             />
         </>

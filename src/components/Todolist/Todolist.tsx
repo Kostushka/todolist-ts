@@ -1,6 +1,8 @@
 import React, { KeyboardEvent, useState } from 'react';
 import { FilterValuesType } from '../../types/types';
 import { TaskType } from '../../types/types';
+import AddItemForm from '../AddItemForm';
+import ChangedTitle from '../ChangedTitle/ChangedTitle';
 import Button from '../Ui/Button';
 import Checkbox from '../Ui/Checkbox/Checkbox';
 import Input from '../Ui/Input';
@@ -17,6 +19,8 @@ type PropsType = {
     addTask: (todoId: string, title: string) => void;
     changeIsDone: (todoId: string, taskId: string, isDone: boolean) => void;
     removeTodoList: (todoId: string) => void;
+    changeTaskTitle: (todoId: string, taskId: string, title: string) => void;
+    changeTodolistTitle: (todoId: string, title: string) => void;
 };
 
 function Todolist({
@@ -29,28 +33,15 @@ function Todolist({
     tasks,
     title,
     filter,
+    changeTaskTitle,
+    changeTodolistTitle,
 }: PropsType) {
-    const [value, setValue] = useState('');
-    const [error, setError] = useState(false);
-
-    const addTaskHandler = () => {
-        if (value.trim()) {
-            addTask(todoId, value.trim());
-        } else {
-            setError(true);
-        }
-        setValue('');
+    const addNewTask = (value: string) => {
+        addTask(todoId, value);
     };
 
-    const onChangeHandler = (value: string) => {
-        setError(false);
-        setValue(value);
-    };
-
-    const onKeyPressHandler = (e: KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            addTaskHandler();
-        }
+    const changeTodolistTitleHandler = (title: string) => {
+        changeTodolistTitle(todoId, title);
     };
 
     const filterButtonClass = {
@@ -78,19 +69,15 @@ function Todolist({
     return (
         <div>
             <div className={styles.title__container}>
-                <h3>{title}</h3>
+                <ChangedTitle
+                    title={title}
+                    changeTitle={changeTodolistTitleHandler}
+                />
                 <Button children={'x'} onClick={() => removeTodoList(todoId)} />
             </div>
 
-            <div>
-                <Input
-                    onChange={onChangeHandler}
-                    onKeyPress={onKeyPressHandler}
-                    value={value}
-                    errorMessage={error}
-                />
-                <Button children={'+'} onClick={addTaskHandler} />
-            </div>
+            <AddItemForm addItem={addNewTask} />
+
             {tasks && (
                 <ul>
                     {tasks.map((t) => {
@@ -107,7 +94,12 @@ function Todolist({
                                         changeIsDone(todoId, t.id, checked)
                                     }
                                 />
-                                <span>{t.title}</span>
+                                <ChangedTitle
+                                    title={t.title}
+                                    changeTitle={(title) =>
+                                        changeTaskTitle(todoId, t.id, title)
+                                    }
+                                />
                                 <Button
                                     children={'x'}
                                     onClick={() => removeTask(todoId, t.id)}

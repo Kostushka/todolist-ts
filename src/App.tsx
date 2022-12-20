@@ -8,6 +8,7 @@ import {
     TaskType,
     TodolistType,
 } from './types/types';
+import AddItemForm from './components/AddItemForm';
 
 function App() {
     const id_1 = v1();
@@ -48,6 +49,29 @@ function App() {
     // ]);
 
     // const [filter, setFilter] = useState<FilterValuesType>('all');
+
+    const addNewTodolist = (value: string) => {
+        const newId = v1();
+        setTodoLists([
+            ...todoLists,
+            { id: newId, title: value, filter: 'all' },
+        ]);
+        setTasks({ ...tasks, [newId]: [] });
+    };
+
+    const changeTodolistTitle = (todoId: string, title: string) => {
+        setTodoLists(
+            todoLists.map((el) => (el.id === todoId ? { ...el, title } : el))
+        );
+    };
+    const changeTaskTitle = (todoId: string, taskId: string, title: string) => {
+        setTasks({
+            ...tasks,
+            [todoId]: tasks[todoId].map((el) =>
+                el.id === taskId ? { ...el, title } : el
+            ),
+        });
+    };
 
     function removeTask(todoId: string, id: string) {
         setTasks({
@@ -121,11 +145,18 @@ function App() {
                 changeIsDone={changeIsDone}
                 removeTodoList={removeTodoList}
                 filter={el.filter}
+                changeTaskTitle={changeTaskTitle}
+                changeTodolistTitle={changeTodolistTitle}
             />
         );
     });
 
-    return <div className='App'>{tasks && <>{todoListCopmonents}</>}</div>;
+    return (
+        <div className='App'>
+            <AddItemForm addItem={addNewTodolist} />
+            {tasks && <>{todoListCopmonents}</>}
+        </div>
+    );
 }
 
 export default App;
